@@ -100,4 +100,37 @@ class Quarterly_Reviews_Public {
 
 	}
 
+	/**
+	 * 
+	 */
+	public function get_employee_list()
+	{
+		$data = $_POST;
+		$resp = new Ajax_Response($data['action']);
+
+		if(!isset($data['employeeEmail'])){
+			$resp->message = 'Looks like youre not a registered employee. Please notify HR.';
+			$resp->status = false;
+		} else {
+			$employeeEmail  = filter_var( trim($data['employeeEmail']), FILTER_SANITIZE_STRING);
+			$employeeList   = Employee::getEmployeeRecords(true);
+			$employeeRecord = Employee::employeeExists($employeeEmail);
+
+			if(count($employeeRecord) == 1 && count($employeeList) > 0){
+				$idx = array_search($employeeRecord[0], $employeeList, true);
+
+				if($idx !== false){
+					unset($employeeList[$idx]);
+				}
+			}
+
+			$resp->data = array(
+				'employeeSelectOptions' => Employee::getEmployeeOptionItems($employeeList)
+			);
+			$resp->status = true;
+		}
+
+		echo $resp->encodeResponse();
+		die(0);
+	}
 }

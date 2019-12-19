@@ -100,6 +100,25 @@ class Quarterly_Reviews {
 	private function load_dependencies() {
 
 		/**
+		 * The class responsible for defining all actions that occur in the public-facing
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-acf-cpt.php';
+
+		/**
+		 * The class responsible for defining all actions that occur in the public-facing
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-ajax-response.php';
+
+
+		/**
+		 * The class responsible for defining all actions that occur in the public-facing
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-employee.php';
+
+		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
@@ -122,8 +141,9 @@ class Quarterly_Reviews {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-quarterly-reviews-public.php';
 
-		$this->loader = new Quarterly_Reviews_Loader();
+		
 
+		$this->loader = new Quarterly_Reviews_Loader();
 	}
 
 	/**
@@ -157,6 +177,8 @@ class Quarterly_Reviews {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+		$this->loader->add_action( 'init', $plugin_admin, 'createPostTypes' , 10 );
+		$this->loader->add_action( 'init', $plugin_admin, 'createThemePages', 20 );
 	}
 
 	/**
@@ -173,6 +195,8 @@ class Quarterly_Reviews {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+		$this->loader->add_action( 'wp_ajax_get_employee_list', 	   $plugin_public, 'get_employee_list', 10 );
+		$this->loader->add_action( 'wp_ajax_nopriv_get_employee_list', $plugin_public, 'get_employee_list', 20 );
 	}
 
 	/**
@@ -213,6 +237,21 @@ class Quarterly_Reviews {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Boolean check for page slug.
+	 *
+	 * @since     1.0.0
+	 * @return    string    The version number of the plugin.
+	 */
+	static function the_slug_exists($post_name) {
+		global $wpdb;
+		if($wpdb->get_row("SELECT post_name FROM wp_posts WHERE post_name = '" . $post_name . "'", 'ARRAY_A')) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
